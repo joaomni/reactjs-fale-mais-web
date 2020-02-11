@@ -1,67 +1,100 @@
-import React from 'react';
+import React, { useState } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import { Container, Row, Col, Button, Form, Table } from 'react-bootstrap';
+import { Container, Row, Col, Button, Form, Table, InputGroup } from 'react-bootstrap';
+import { FaRegClock } from "react-icons/fa";
+import  FaleMais from './services/FaleMais';
 
 function App() {
+  const [callPrice, setCallPrice] = useState(0.01);
+
+  const [validated, setValidated] = useState(false);
+
+  async function handleSubmit(e, data) {
+    const form = e.currentTarget;
+
+    if (form.checkValidity() === false) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    else {
+      const { dddOrigin, dddDestiny, callTime, plan } = data;
+
+      console.log(plan);
+
+      const res = new FaleMais;
+
+      let calculateCall = res.withFaleMais(dddOrigin, dddDestiny, callTime, plan);
+
+      setCallPrice(calculateCall);
+
+      console.log(callPrice);
+    }
+
+    setValidated(true);
+  }
+
   return (
     <>
       <Container>
         <Row style={{marginTop: 100}}>
           <Col style={{marginBottom: 30}} sm={8}>
-            <Form>
+            <Form noValidate validated={validated} onSubmit={handleSubmit}>
               <Form.Group>
-                <Form.Label style={{fontSize: 20}}>Escolher os códigos das cidades de origem e destino:</Form.Label>
+                <Form.Label style={title}>Escolher os códigos das cidades de origem e destino:</Form.Label>
               </Form.Group>
               
               <Form.Row>
                 <Form.Group as={Col}>
-                  <Form.Control as="select">
-                    <option selected disabled>Selecione origem</option>
-                    <option>011</option>
-                    <option>016</option>
-                    <option>017</option>
-                    <option>018</option>
+                  <Form.Control name="dddOrigin" defaultValue={''} as="select" required>
+                    <option value="" disabled>Selecione origem</option>
+                    <option value="5">011</option>
+                    <option value="6">016</option>
+                    <option value="7">017</option>
+                    <option value="8">018</option>
                   </Form.Control>
                 </Form.Group>
 
                 <Form.Group as={Col}>
-                  <Form.Control as="select">
-                    <option selected disabled>Selecione destino</option>
-                    <option>011</option>
-                    <option>016</option>
-                    <option>017</option>
-                    <option>018</option>
+                  <Form.Control name="dddDestiny" defaultValue={''} as="select" required>
+                    <option value="" disabled>Selecione destino</option>
+                    <option value="5">011</option>
+                    <option value="6">016</option>
+                    <option value="7">017</option>
+                    <option value="8">018</option>
                   </Form.Control>
                 </Form.Group>
               </Form.Row>
 
-              {/* <Form.Group>
-                <Form.Control as="select">
-                  <option selected disabled>Selecione o tempo da ligação</option>
-                  <option>20</option>
-                  <option>80</option>
-                  <option>200</option>
-                  <option>100</option>
-                </Form.Control>
-              </Form.Group> */}
-
               <Form.Group>
-                <Form.Label style={{fontSize: 20}}>Escolha o tempo da ligação:</Form.Label>
-                <Form.Control type="number" placeholder="120" />
+                <Form.Label style={title}>Digite o tempo da ligação em minutos:</Form.Label>
+                <InputGroup>
+                  <InputGroup.Prepend>
+                    <InputGroup.Text><FaRegClock/></InputGroup.Text>
+                  </InputGroup.Prepend>
+                  <Form.Control
+                    placeholder="Ex: 120"
+                    type="number"
+                    name="callTime"
+                    required
+                  />
+                </InputGroup>
+                <Form.Control.Feedback type="invalid">
+                  Por favor, digite o tempo da ligação.
+                </Form.Control.Feedback>
               </Form.Group>
 
               <Form.Group>
-                <Form.Label style={{fontSize: 20}}>Escolha um plano FaleMais:</Form.Label>
-                <Form.Control as="select">
-                  <option selected disabled>Selecione o plano</option>
-                  <option>FaleMais 30</option>
-                  <option>FaleMais 60</option>
-                  <option>FaleMais 120</option>
+                <Form.Label style={title}>Escolha um plano FaleMais:</Form.Label>
+                <Form.Control name="plan" defaultValue={''} as="select" required>
+                  <option value="" disabled>Selecione o plano</option>
+                  <option value="30">FaleMais 30</option>
+                  <option value="60">FaleMais 60</option>
+                  <option value="120">FaleMais 120</option>
                 </Form.Control>
               </Form.Group>
 
               <Form.Group>
-                <Button variant="primary" size="lg" block type="button">
+                <Button variant="primary" size="lg" block type="submit">
                   Calcular ligação
                 </Button>
               </Form.Group>
@@ -100,9 +133,20 @@ function App() {
               </Form.Group>
             </Form>
           </Col>
+          <Col>
+            <Form>
+              <Form.Group>
+                <Form.Control 
+                  type="text"
+                  value={`$ ${callPrice}`}
+                  onChange={e => setCallPrice(e.target.value)}
+                />
+              </Form.Group>
+            </Form>
+          </Col>
           <Col sm={4}>
             <Form.Group>
-              <Form.Label style={{fontSize: 20}}>Tarifa por minuto</Form.Label>
+              <Form.Label style={title}>Tarifa por minuto</Form.Label>
               <Table striped bordered hover>
                 <thead>
                   <tr>
@@ -144,33 +188,53 @@ function App() {
                   </tr>
                   <tr>
                     <td>011</td>
-                    <td>016</td>
-                    <td>1.90</td>
+                    <td>011</td>
+                    <td>0.20</td>
                   </tr>
                   <tr>
                     <td>016</td>
-                    <td>011</td>
-                    <td>2.90</td>
-                  </tr>
-                  <tr>
-                    <td>011</td>
                     <td>017</td>
-                    <td>1.70</td>
+                    <td>1.80</td>
                   </tr>
                   <tr>
                     <td>017</td>
-                    <td>011</td>
-                    <td>2.70</td>
+                    <td>016</td>
+                    <td>2.80</td>
                   </tr>
                   <tr>
-                    <td>011</td>
+                    <td>016</td>
                     <td>018</td>
-                    <td>0.90</td>
+                    <td>1.60</td>
                   </tr>
                   <tr>
                     <td>018</td>
-                    <td>011</td>
-                    <td>1.90</td>
+                    <td>016</td>
+                    <td>2.60</td>
+                  </tr>
+                  <tr>
+                    <td>016</td>
+                    <td>016</td>
+                    <td>0.30</td>
+                  </tr>
+                  <tr>
+                    <td>017</td>
+                    <td>018</td>
+                    <td>0.40</td>
+                  </tr>
+                  <tr>
+                    <td>017</td>
+                    <td>017</td>
+                    <td>0.80</td>
+                  </tr>
+                  <tr>
+                    <td>018</td>
+                    <td>017</td>
+                    <td>1.40</td>
+                  </tr>
+                  <tr>
+                    <td>018</td>
+                    <td>018</td>
+                    <td>0.30</td>
                   </tr>
                 </tbody>
               </Table>
@@ -182,10 +246,8 @@ function App() {
   );
 }
 
-// const styles = StyleSheet.create({
-//   simulador: {
-    
-//   },
-// });
+const title = {
+  fontSize: 20,
+}
 
 export default App;
